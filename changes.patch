@@ -1,0 +1,104 @@
+diff --git a/demo/run_demo.py b/demo/run_demo.py
+index 632a8fab856fd4dfb753a2b4cdc0869066c33769..45d72a88924888ea57c447bbf8a1965726647143 100644
+--- a/demo/run_demo.py
++++ b/demo/run_demo.py
+@@ -1,56 +1,94 @@
+ import argparse
++import importlib
+ import json
+ import sys
+ from pathlib import Path
+
+ ROOT = Path(__file__).resolve().parents[1]
+ sys.path.insert(0, str(ROOT))
+
+
+ def ensure_demo_dependencies() -> None:
++    """Create minimum files needed for pure local demo execution if missing."""
+     required_files = {
+         ROOT / "engine/__init__.py": "",
+         ROOT / "engine/adapters/__init__.py": "",
+         ROOT / "engine/adapters/mock/__init__.py": "",
+-        ROOT / "engine/adapters/mock/mock_firewall_adapter.py": '''import copy\nimport json\nfrom pathlib import Path\n\nfrom engine.ports.firewall_port import FirewallPort\n\n\nclass MockFirewallAdapter(FirewallPort):\n    def __init__(self, fixture_root: str = \"demo/fixtures/policy_snapshots\") -> None:\n        self.fixture_root = Path(fixture_root)\n\n    def read_policy_snapshot(self, snapshot_ref: str):\n        return json.loads((self.fixture_root / f\"{snapshot_ref}.json\").read_text())\n\n    def apply_plan(self, plan: dict):\n        after = copy.deepcopy(plan[\"snapshot_before\"])\n        after[\"snapshot_id\"] = plan[\"change_request_id\"] + \"-after\"\n        if plan.get(\"operations\"):\n            after[\"normalized_policy_hash\"] = plan[\"plan_hash\"][:16]\n        return {\"status\": \"applied\", \"snapshot_after\": after}\n''',
++        ROOT / "engine/ports/__init__.py": "",
++        ROOT / "engine/ports/firewall_port.py": (
++            "from abc import ABC, abstractmethod\n\n"
++            "class FirewallPort(ABC):\n"
++            "    @abstractmethod\n"
++            "    def read_policy_snapshot(self, snapshot_ref: str):\n"
++            "        raise NotImplementedError\n\n"
++            "    @abstractmethod\n"
++            "    def apply_plan(self, plan: dict):\n"
++            "        raise NotImplementedError\n"
++        ),
++        ROOT / "engine/adapters/mock/mock_firewall_adapter.py": (
++            "import copy\n"
++            "import json\n"
++            "from pathlib import Path\n\n"
++            "from engine.ports.firewall_port import FirewallPort\n\n"
++            "class MockFirewallAdapter(FirewallPort):\n"
++            "    def __init__(self, fixture_root: str = 'demo/fixtures/policy_snapshots') -> None:\n"
++            "        self.fixture_root = Path(fixture_root)\n\n"
++            "    def read_policy_snapshot(self, snapshot_ref: str):\n"
++            "        return json.loads((self.fixture_root / f'{snapshot_ref}.json').read_text())\n\n"
++            "    def apply_plan(self, plan: dict):\n"
++            "        after = copy.deepcopy(plan['snapshot_before'])\n"
++            "        after['snapshot_id'] = plan['change_request_id'] + '-after'\n"
++            "        if plan.get('operations'):\n"
++            "            after['normalized_policy_hash'] = plan['plan_hash'][:16]\n"
++            "        return {'status': 'applied', 'snapshot_after': after}\n"
++        ),
+         ROOT / "demo/scenarios/happy_path.json": json.dumps(
+             {
+                 "change_request": "demo/fixtures/change_requests/crq-2026-000321.json",
+                 "mapping_report": "demo/fixtures/mapping_reports/crq-2026-000321.json",
+                 "baseline_snapshot": "demo/fixtures/policy_snapshots/baseline-fw-core.json",
+                 "rule_metadata": "demo/fixtures/rule_metadata/default.json",
+                 "operation_mode": "plan_only",
+                 "as_of": "2026-04-10T00:00:00Z",
+             },
+             indent=2,
+-        ) + "\n",
++        )
++        + "\n",
+     }
+
+     for path, content in required_files.items():
+         path.parent.mkdir(parents=True, exist_ok=True)
+         if not path.exists():
+             path.write_text(content)
+
+
++def load_runner():
++    ensure_demo_dependencies()
++    try:
++        return importlib.import_module("engine.core.engine").run_scenario
++    except ModuleNotFoundError:
++        # Retry once after bootstrap in partially copied trees.
++        ensure_demo_dependencies()
++        return importlib.import_module("engine.core.engine").run_scenario
++
++
+ def main() -> None:
+     parser = argparse.ArgumentParser()
+     parser.add_argument(
+         "--scenario",
+         default="happy_path",
+         choices=["happy_path", "drift_detection", "recertification"],
+         help="Scenario name (defaults to happy_path)",
+     )
+     args = parser.parse_args()
+
+-    ensure_demo_dependencies()
+-
+-    from engine.core.engine import run_scenario
++    run_scenario = load_runner()
+
+     scenario_path = ROOT / "demo/scenarios" / f"{args.scenario}.json"
+     scenario = json.loads(scenario_path.read_text())
+     result = run_scenario(scenario, run_id=f"{args.scenario}-001")
+     print(json.dumps(result, sort_keys=True))
+
+
+ if __name__ == "__main__":
+     main()

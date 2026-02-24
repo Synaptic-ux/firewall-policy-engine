@@ -1,0 +1,21 @@
+{
+  "change_request_id": "crq-2026-000321",
+  "idempotency_key": "idem-1",
+  "source_system": "mock",
+  "source_reference_id": "src-321",
+  "requester": {"id": "usr-req-1"},
+  "business_owner": {"id": "usr-biz-1"},
+  "technical_owner": {"id": "usr-tech-1"},
+  "environment": "prod",
+  "firewall_domain": "fw-domain-core",
+  "policy_scope": "zone-internet-to-app",
+  "action": "allow",
+  "operation_mode": "plan_only",
+  "priority": "normal",
+  "flows": [
+    {"flow_id": "flow-1", "src": "net-frontend", "dst": "obj-appA", "service": "svc-https", "direction": "ingress"}
+  ],
+  "justification": "Synthetic request for demo.",
+  "required_approvals": 2,
+  "approver_roles": ["security", "network"]
+}

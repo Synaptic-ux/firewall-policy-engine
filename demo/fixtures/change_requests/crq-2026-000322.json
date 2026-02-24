@@ -1,0 +1,21 @@
+{
+  "change_request_id": "crq-2026-000322",
+  "idempotency_key": "idem-2",
+  "source_system": "mock",
+  "source_reference_id": "src-322",
+  "requester": {"id": "usr-req-2"},
+  "business_owner": {"id": "usr-biz-2"},
+  "technical_owner": {"id": "usr-tech-2"},
+  "environment": "prod",
+  "firewall_domain": "fw-domain-core",
+  "device_group": "edge-dc1",
+  "action": "modify",
+  "operation_mode": "apply_enabled",
+  "priority": "high",
+  "flows": [
+    {"flow_id": "flow-2", "src": "net-partner", "dst": "obj-appA", "service": "svc-https", "direction": "ingress"}
+  ],
+  "justification": "Synthetic apply-enabled request.",
+  "required_approvals": 2,
+  "approver_roles": ["security", "network"]
+}

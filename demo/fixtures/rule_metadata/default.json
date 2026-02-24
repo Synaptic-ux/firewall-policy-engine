@@ -1,0 +1,5 @@
+[
+  {"rule_id":"r-1","owner":"usr-tech-1","expiry":"2099-01-01T00:00:00Z"},
+  {"rule_id":"r-2","owner":"","expiry":"2024-01-01T00:00:00Z"},
+  {"rule_id":"r-3","expiry":"2026-01-01T00:00:00Z"}
+]

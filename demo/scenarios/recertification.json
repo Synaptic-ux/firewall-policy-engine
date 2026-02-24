@@ -1,0 +1,8 @@
+{
+  "change_request": "demo/fixtures/change_requests/crq-2026-000322.json",
+  "mapping_report": "demo/fixtures/mapping_reports/crq-2026-000322.json",
+  "baseline_snapshot": "demo/fixtures/policy_snapshots/baseline-fw-core.json",
+  "rule_metadata": "demo/fixtures/rule_metadata/default.json",
+  "operation_mode": "apply_enabled",
+  "as_of": "2026-04-10T00:00:00Z"
+}

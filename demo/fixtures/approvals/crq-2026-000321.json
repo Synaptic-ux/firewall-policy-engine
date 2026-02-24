@@ -1,0 +1,4 @@
+[
+  {"approval_record_id":"apr-321-1","change_request_id":"crq-2026-000321","decision":"approved","approver_id":"usr-sec","approver_role":"security","timestamp":"2026-04-08T16:00:00Z","rationale":"ok"},
+  {"approval_record_id":"apr-321-2","change_request_id":"crq-2026-000321","decision":"approved","approver_id":"usr-net","approver_role":"network","timestamp":"2026-04-08T16:01:00Z","rationale":"ok"}
+]
